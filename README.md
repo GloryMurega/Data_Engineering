@@ -3,18 +3,17 @@ Creating Gans local and cloud data pipelines
 ---
 ## Table of Contents
 1. [Project Overview](#project-overview)
-2. [Data Sources](#data-sources)
-3. [Tools Used](#tools-used)
-4. [ Data Exploration and Analysis (EDA)](#data-exploration-and-analysis-eda)
-5. [Data Insights](#data-insights)
-6. [Recommendations](#recommendations)
-7. [References](#references)
+2. [Data Description and Sources](#data-description-and-sources)
+3. [Data Collection Approach](#data-collection-approach)
+4. [Key Considerations and Questions](#key-considerations-and-questions)
+5. [Limitations and Disclaimers](#limitations-and-disclaimers)
+6. [References](#references)
    
 ## Project Overview
 Gans is a theoretical startup revolutionizing e-scooter-sharing, aiming to streamline operations in vibrant cities across Europe and the UK. To remain competitive, their success hinges on ensuring scooters are parked conveniently for users, who are assumed to be young city tourists.
 - **The Challenge** - Ideally, scooters should reposition themselves organically, but real-world scenarios like daily commutes and unexpected weather changes create imbalances. For example, scooters tend to move from residential neighborhoods to city centers in the morning, or their usage drops when it rains. To better predict customer behavior, Gans needs demographic, location, airport, flights, and weather data for Berlin and London. As a Junior Data Engineer at Gans, the task is to develop an automated data pipeline that gathers real-time data from various external sources and makes it accessible to everyone in the organization, thus informing business decisions like incentivizing certain park locations.
 
-## Data Sources
+## Data Description and Sources
 The data for this project is collected from various sources harnessing ethical Web scrapping methods and API tools. Below is a brief description on each dataset:
 
 - **city:** Contains unique data on London and Berlin such as population and geographical coordinates. This data was Web scrapped from Wikipedia. 
@@ -23,41 +22,56 @@ The data for this project is collected from various sources harnessing ethical W
 - **flight:** Contains 'the next day' flight information expected to arrive at the specified airport. This data is collected from AeroDataBox on Rapid API, with 'GET FIDS/Schedules (airport 
  departures and arrivals) - by local time range' as the end point.
 
-## Tools Used
-- **JupyterLab:** For programming.
-- **MySQL:** For data storage and database management.
-- **Google Cloud Platform:** For creating the cloud pipeline, cloud function and scheduling.
-- **Medium:** Blog to document journey into data engineering.
-  
-## Data Exploration and Analysis (EDA)
-#### SQL
-- **EDA Questions**
-1. **Data base**: What time frame does the Magist sales database cover?
-2. **Products**: What kind of tech products does Magist sell? What percentage of its portfolio is tech products? How do their sales perform?
-3. **Sellers**: How many sellers does Magist have, and what percentage of them sell tech products?
-4. **Prices**: What is the average price of tech products being sold? How do the high_end_products perform in terms of sales?
-5. **Delivery timelines**: What’s the average time between the order being placed and the product being delivered? How many orders are delivered on time versus those delivered with a delay?
-#### Tableau 
-- **EDA Questions**
-1. Check non-tech but related products such as accessories, including price range, delivery timelines, customer satisfaction rates, and sales.
-2. Analyze phone sales where price > $500 to determine if the customer base is suitable for high-end phones.
-3. Explore patterns for delayed orders and possible causes, such as product weight, size and geolocation.
-4. Examine delivery times for small products (<2 kg) to compare with expected timelines for Apple products.
+## Data Collection Approach
+**Phase 1: Local Pipeline for Static Data**
 
-## Data Insights
-- Segmentation of tech products - tech products accounting for approximately 10% of total sales
-- Prices - the average price of tech products sold is €120.65 with approximately 1.10% being high_end_products (Eniac's average item price is €540.)
-- Magist Tech sellers - tech sellers make up about 14.67% of all sellers
-- Geolocation analysis - Analysis revealed that the majority of sales were concentrated along the coast of Brazil, with São Paulo being the largest market with 60% of total sales
-- Magist delivery timelines - Magist has a delivery rate of 8.6% within a 3-day timeframe and 37% after extending the timeframe to 7 days. In São Paulo, however the delivery rate is 87% within a 3-day timeframe. (Eniac's timeline is 2-3 days)
+In the first phase, create a local pipeline using static data on airports and cities. We employ web scraping tools.
+**Tools Used**
+- BeautifulSoup: A Python library used for parsing HTML and XML documents to extract data from web pages
+- Requests library in Python: used to send GET requests.
+- MySQL: Storage and management of collected data to ensure data integrity and consistency for various applications across the Gans organization.
   
-## Recommendations
-- Forge a strategic market entry partnership with Magist for tech companion products and accessories in São Paulo as a pivotal test market to acquire Brazilian market knowledge.
-- Informed by the insights gathered from São Paulo, consider extending to Paraná, a region noted as the second-largest market by sales.
-- Evaluate and optimizate the Magist Contract after an year to ensure alignment with Eniac's evolving business objectives and enable the refinement of contractual terms to optimize operational efficiency and mitigate risks.
+**Phase 2: Cloud Pipeline for Dynamic Data**
+
+In the second phase, create a cloud pipeline for dynamic data on weather and flights by leveraging APIs.
+
+**Tools Used**
+- JSON: Used to handle the data format.
+- OpenWeatherMap API for weather data
+- AeroDataBox API for flight data
+
+**Phase 3: Google Cloud Automation**
+
+Deploy data collection scripts as Google Cloud Functions.
+Schedule these functions using Google Cloud Scheduler to run at your desired intervals here Cron Syntax: 55 23 * * * for every day at 23:55.
+
+**Tools Used**
+- Google Cloud Platform (GCP)
+
+## Key Considerations and Questions
+1. Data Requirements - Determine where the data is needed and which variables are important.
+2. Automation - How to automate city data collection from Wikipedia and weather/flight data from APIs.
+3. Data Types - Retrieve the data in the appropriate format and ensure it is stored in the correct type in the database.
+4. Weather Data Limitation - How to limit weather forecasts to 24 hours to avoid duplicates.
+5. Flight Data Automation: Automate the retrieval of flight data for the a full next day, given the API’s 12-hour intervals.
+6. Database Linking - How establish relationships between tables in SQL.
+7. Scheduling - when to schedule the functions on GCP to ensure timely updates to the database.
+  
+## Limitations and Disclaimers
+**Resource Constraints**
+- Some APIs have usage limits or costs associated with higher tiers of access, which can become expensive.
+- Using cloud services like Google Cloud Platform incurs costs, which can increase with the scale of the data and the frequency of data collection.
+  
+**Data Integration**
+- Combining data from different sources (web scraping and various APIs) requires careful handling to maintain consistency and accuracy.
+- Regular maintenance as any changes in the data from APIs or data sources will need corresponding changes in the database and processing scripts.
+
+**Data Quality and Reliability**
+- Web Scraping can be unreliable due to changes in website structure, anti-scraping measures, and the potential for incomplete or outdated information.
+- Dependence on third-party APIs means that any downtime, changes in API structure, or limitations (like rate limits) could impact data availability and quality.
   
 ## References
-- Tableau knowledge base
+- Google Cloud Platform documentation
 - SQL documentation
 - Stack Overflow
 - WBS Coding School
